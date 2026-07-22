@@ -1,0 +1,122 @@
+{
+  "generatedAtNote": "Set by CI at build time; see workflow.",
+  "gateOrder": [
+    "G0",
+    "G1",
+    "G2",
+    "G3",
+    "G4",
+    "G5"
+  ],
+  "stageOrder": [
+    "specify",
+    "clarify",
+    "plan",
+    "tasks",
+    "implement",
+    "verify",
+    "archive",
+    "pr-review"
+  ],
+  "stats": {
+    "features": 1,
+    "archived": 0,
+    "gatesPassed": 3,
+    "gatesConcerns": 0,
+    "gatesFailed": 0,
+    "openClarifications": 0
+  },
+  "features": [
+    {
+      "slug": "003-health",
+      "path": "demo/health-app/.forge/changes/003-health",
+      "isDemo": true,
+      "archived": false,
+      "gates": [
+        {
+          "id": "G0",
+          "gate": "G0 Spec-clarity",
+          "verdict": "PASS",
+          "reasons": [
+            "`spec.md` R-1 has a complete Given/When/Then; no `[NEEDS CLARIFICATION]` remains; the ADDED section is internally consistent."
+          ],
+          "justified": false
+        },
+        {
+          "id": "G1",
+          "gate": "G1 Constitution/Simplicity",
+          "verdict": "PASS",
+          "reasons": [
+            "`plan.md` triage is LOW (1/10): one route, one file, no new deps — honors the constitution's simplicity budget."
+          ],
+          "justified": false
+        },
+        {
+          "id": "G2",
+          "gate": "G2 PO/Plan-review",
+          "verdict": "PASS",
+          "reasons": [
+            "`tasks.md` covers R-1 (RED test + impl) and each task names its file(s) + a verify step; plan, tasks, and spec agree."
+          ],
+          "justified": false
+        }
+      ],
+      "spec": {
+        "requirements": [
+          {
+            "id": "R-1",
+            "title": "Health endpoint",
+            "section": "ADDED",
+            "clarifications": []
+          }
+        ],
+        "needsClarification": 0
+      },
+      "plan": {
+        "score": 1,
+        "tier": "LOW"
+      },
+      "tasks": {
+        "waves": [
+          {
+            "n": 1,
+            "tasks": [
+              {
+                "num": 1,
+                "parallel": false,
+                "text": "Add the failing test for `GET /health` (RED)",
+                "files": [
+                  "test/health.test.js"
+                ],
+                "verify": "`npm test` fails on the health case for the right reason (route returns 404, not 200)."
+              },
+              {
+                "num": 2,
+                "parallel": false,
+                "text": "Implement the `GET /health` route (GREEN)",
+                "files": [
+                  "src/server.js"
+                ],
+                "verify": "`npm test` passes (all cases green)."
+              }
+            ]
+          }
+        ],
+        "count": 2
+      },
+      "verify": null,
+      "stage": "tasks",
+      "next": "/forge:implement 003-health",
+      "health": "PASS",
+      "trace": [
+        {
+          "req": "R-1",
+          "title": "Health endpoint",
+          "section": "ADDED",
+          "inTasks": true,
+          "verified": null
+        }
+      ]
+    }
+  ]
+}
