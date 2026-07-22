@@ -27,3 +27,10 @@
 - R-1/R-2/R-3 acceptance lines each backed by a passing test in `merge.test.js` and the `mergeState` impl in `worker.js`.
 - `node --test` → 4/4 pass; verify-report shows 3/3 acceptance met, no UNMET line.
 - No spec violation or scope creep beyond the accepted delta.
+
+### G5 Merge — CONCERNS
+- Stage 1 spec compliance: full PASS — R-1/R-2/R-3 all MET, no scope creep (reviewer + verify-report.md agree).
+- Stage 2 CONCERN: `backend/src/worker.js:142` `track: incoming.track` has no fallback if falsy — safe today (caller always pre-normalises) but latent if `mergeState` is ever called with raw input.
+- Advisory (non-blocking): missing tests for same-url title/src collision, empty-queue/empty-learning inputs, and `handlePutState`'s malformed-KV-JSON fallback path.
+- No failing/pending CI checks (none configured on this repo), no merge conflicts (mergeStateStatus: CLEAN).
+- Escalated per `github-escalation` skill: PR #1 comment posted with options; awaiting human decision. NOT merged.
