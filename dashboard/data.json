@@ -19,14 +19,88 @@
     "pr-review"
   ],
   "stats": {
-    "features": 1,
+    "features": 2,
     "archived": 0,
-    "gatesPassed": 3,
+    "gatesPassed": 4,
     "gatesConcerns": 0,
     "gatesFailed": 0,
     "openClarifications": 0
   },
   "features": [
+    {
+      "slug": "001-state-merge",
+      "path": ".forge/changes/001-state-merge",
+      "isDemo": false,
+      "archived": false,
+      "gates": [
+        {
+          "id": "G0",
+          "gate": "G0 Spec-clarity",
+          "verdict": "PASS",
+          "reasons": [
+            "No `[NEEDS CLARIFICATION]` markers in spec.md; all three requirements (R-1, R-2, R-3) fully specified with concrete example values.",
+            "Every requirement has explicit Given/When/Then scenarios with concrete inputs and expected outputs.",
+            "ADDED/MODIFIED/REMOVED sections all present; MODIFIED and REMOVED explicitly `<!-- none -->`, consistent with a pure-addition delta."
+          ],
+          "justified": false
+        }
+      ],
+      "spec": {
+        "requirements": [
+          {
+            "id": "R-1",
+            "title": "Queue is unioned on merge",
+            "section": "ADDED",
+            "clarifications": []
+          },
+          {
+            "id": "R-2",
+            "title": "Done flag survives merge (done=true wins)",
+            "section": "ADDED",
+            "clarifications": []
+          },
+          {
+            "id": "R-3",
+            "title": "Learning flags are OR'd; track takes incoming",
+            "section": "ADDED",
+            "clarifications": []
+          }
+        ],
+        "needsClarification": 0
+      },
+      "plan": null,
+      "tasks": {
+        "waves": [],
+        "count": 0
+      },
+      "verify": null,
+      "stage": "specify",
+      "next": "/forge:plan 001-state-merge",
+      "health": "PASS",
+      "trace": [
+        {
+          "req": "R-1",
+          "title": "Queue is unioned on merge",
+          "section": "ADDED",
+          "inTasks": false,
+          "verified": null
+        },
+        {
+          "req": "R-2",
+          "title": "Done flag survives merge (done=true wins)",
+          "section": "ADDED",
+          "inTasks": false,
+          "verified": null
+        },
+        {
+          "req": "R-3",
+          "title": "Learning flags are OR'd; track takes incoming",
+          "section": "ADDED",
+          "inTasks": false,
+          "verified": null
+        }
+      ]
+    },
     {
       "slug": "003-health",
       "path": "demo/health-app/.forge/changes/003-health",
