@@ -163,13 +163,15 @@ function parseTasks(md) {
   return { waves, count };
 }
 
-/** Parse verify-report.md → { checks:[{line,met}], met, total }. */
+/** Parse verify-report.md → { checks:[{line,req,met}], met, total }.
+ *  Tolerates an optional `R-<n>:` prefix before the quoted acceptance line. */
 function parseVerify(md) {
   if (!md) return null;
   const checks = [];
   for (const line of md.split(/\r?\n/)) {
-    const c = line.match(/^\s*-\s*\[.\]\s*"(.+?)"\s*—\s*\*\*(MET|UNMET)\*\*/i);
-    if (c) checks.push({ line: c[1], met: c[2].toUpperCase() === "MET" });
+    // - [x] R-1: "acceptance line" — **MET** — evidence…   (R-<n>: prefix optional)
+    const c = line.match(/^\s*-\s*\[.\]\s*(?:(R-\d+):\s*)?"(.+?)"\s*—\s*\*\*(MET|UNMET)\*\*/i);
+    if (c) checks.push({ req: c[1] || null, line: c[2], met: c[3].toUpperCase() === "MET" });
   }
   return { checks, met: checks.filter((c) => c.met).length, total: checks.length };
 }
@@ -244,11 +246,26 @@ features.sort((a, b) => a.slug.localeCompare(b.slug));
 
 // Traceability rows: R-<n> → covered-by-task? → verified?
 for (const f of features) {
+  const g2passed = f.gates.some((g) => g.id === "G2" && g.verdict === "PASS");
   f.trace = f.spec.requirements.map((r) => {
-    const inTasks = f.tasks.waves.some((w) =>
-      w.tasks.some((t) => t.text.toLowerCase().includes(r.title.toLowerCase().split(" ")[0]))
-    );
-    const verified = f.verify ? f.verify.checks.some((c) => c.met) : null;
+    const idRe = new RegExp("\\b" + r.id + "\\b");
+    // Direct signal: the requirement id is named in a task line.
+    const idInTask = f.tasks.waves.some((w) => w.tasks.some((t) => idRe.test(t.text)));
+    // Fallback: tasks exist and G2 (which asserts task↔requirement coverage) passed.
+    const inTasks = idInTask || (f.tasks.count > 0 && g2passed);
+
+    let verified = null;
+    if (f.verify) {
+      const tagged = f.verify.checks.filter((c) => c.req);
+      if (tagged.length) {
+        // Verify checks carry R-ids → match this requirement precisely.
+        const m = tagged.find((c) => c.req === r.id);
+        verified = m ? m.met : false;
+      } else {
+        // Untagged checks → fall back to "all acceptance lines met".
+        verified = f.verify.total > 0 && f.verify.met === f.verify.total;
+      }
+    }
     return { req: r.id, title: r.title, section: r.section, inTasks, verified };
   });
 }
