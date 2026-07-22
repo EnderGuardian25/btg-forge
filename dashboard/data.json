@@ -173,9 +173,25 @@
         "count": 4
       },
       "verify": {
-        "checks": [],
-        "met": 0,
-        "total": 0
+        "checks": [
+          {
+            "req": "R-1",
+            "line": "the persisted queue contains both `A` and `B` (no item is dropped)",
+            "met": true
+          },
+          {
+            "req": "R-2",
+            "line": "the persisted queue has exactly one item for url `A` with `done:true`",
+            "met": true
+          },
+          {
+            "req": "R-3",
+            "line": "the persisted `learning` is `{\"learn-1\": true, \"learn-2\": true}` (once true, stays true) and `track` is `\"design\"` (incoming wins)",
+            "met": true
+          }
+        ],
+        "met": 3,
+        "total": 3
       },
       "stage": "verify",
       "next": "/forge:pr-review <PR#>",
@@ -185,22 +201,22 @@
           "req": "R-1",
           "title": "Queue is unioned on merge",
           "section": "ADDED",
-          "inTasks": false,
-          "verified": false
+          "inTasks": true,
+          "verified": true
         },
         {
           "req": "R-2",
           "title": "Done flag survives merge (done=true wins)",
           "section": "ADDED",
-          "inTasks": false,
-          "verified": false
+          "inTasks": true,
+          "verified": true
         },
         {
           "req": "R-3",
           "title": "Learning flags are OR'd; track takes incoming",
           "section": "ADDED",
-          "inTasks": false,
-          "verified": false
+          "inTasks": true,
+          "verified": true
         }
       ]
     },
