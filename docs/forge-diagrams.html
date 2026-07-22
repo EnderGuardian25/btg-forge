@@ -81,6 +81,8 @@
   .state .ntag{fill:var(--state)}
   .cond .nbox{stroke:var(--muted); stroke-dasharray:5 4; fill:var(--panel-2)}
   .cond .ntag{fill:var(--muted)}
+  .ideate .nbox{stroke:var(--accent); stroke-dasharray:5 4; fill:var(--panel)}
+  .ideate .ntag{fill:var(--accent)}
 
   .ntag{font-family:var(--mono); font-weight:600; font-size:14px}
   .nsub{font-family:var(--body); font-weight:400; font-size:10.5px; fill:var(--muted)}
@@ -100,6 +102,7 @@
   .edge.bmad{stroke:var(--bmad)}
   .edge.cond{stroke:var(--muted); stroke-width:1.6; stroke-dasharray:5 4}
   .edge.bus{stroke:var(--line); stroke-width:1.5}
+  .edge.adv{stroke:var(--accent); stroke-width:1.7; stroke-dasharray:5 4}
   .elabel{font-family:var(--mono); font-size:10.5px; font-weight:500; fill:var(--muted)}
   .elabel-bg{fill:var(--panel)}
 
@@ -111,6 +114,7 @@
   .sw.cmd{border-color:var(--ink)} .sw.acc{border-color:var(--accent)}
   .sw.bmad{border-color:var(--bmad)} .sw.state{border-color:var(--state)}
   .sw.cond{border-color:var(--muted); border-top-style:dashed}
+  .sw.adv{border-color:var(--accent); border-top-style:dashed}
   .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
   .dot.pass{background:var(--pass)} .dot.concern{background:var(--concern)} .dot.fail{background:var(--fail)}
   .note{margin-top:16px; padding:13px 16px; border-left:3px solid var(--concern);
@@ -139,17 +143,19 @@
   <section aria-labelledby="pl-h">
     <div class="sec-head"><span class="sec-num">01</span><h2 id="pl-h">The pipeline</h2></div>
     <p class="sec-sub">All ten commands on a single spine. Gates hang to the right as checkpoints; the
-      <strong>BMAD escalation</strong> branches left off <code>plan</code> when triage returns HIGH.
-      Connectors are strictly horizontal &amp; vertical.</p>
+      <strong>BMAD escalation</strong> branches left off <code>plan</code> when triage returns HIGH. The
+      read-only <strong>brainstormer</strong> feeds ideas into <code>specify</code> and <code>plan</code>
+      up front. Connectors are strictly horizontal &amp; vertical.</p>
     <div class="board"><div class="scroll">
       <svg id="pipeline" role="img" aria-labelledby="pl-t pl-d" preserveAspectRatio="xMidYMin meet"></svg>
       <span id="pl-t" class="sr">BTG Forge pipeline diagram</span>
-      <span id="pl-d" class="sr">A vertical spine of commands — init, specify, plan, tasks, implement, verify, archive, pr-review — with gates G0 through G5 as checkpoints on the right, a conditional clarify loop on gate G0, an advisory analyze step feeding gate G4, and a BMAD escalation branch (analyst, pm, architect, po) on the left off the plan command.</span>
+      <span id="pl-d" class="sr">A vertical spine of commands — init, specify, plan, tasks, implement, verify, archive, pr-review — with gates G0 through G5 as checkpoints on the right, a conditional clarify loop on gate G0, an advisory analyze step feeding gate G4, a BMAD escalation branch (analyst, pm, architect, po) on the left off the plan command, and a read-only brainstormer agent feeding ideas into specify and plan.</span>
     </div>
       <div class="legend">
         <span class="k"><span class="sw cmd"></span>command</span>
         <span class="k"><span class="sw acc"></span>flow</span>
         <span class="k"><span class="sw bmad"></span>BMAD tier (HIGH)</span>
+        <span class="k"><span class="sw adv"></span>brainstormer (ideation)</span>
         <span class="k"><span class="sw cond"></span>conditional / advisory</span>
         <span class="k"><span class="dot pass"></span><span class="dot concern"></span><span class="dot fail"></span>&nbsp;gate = PASS · CONCERNS · FAIL</span>
       </div>
@@ -167,11 +173,12 @@
     <div class="board"><div class="scroll">
       <svg id="arch" role="img" aria-labelledby="ar-t ar-d" preserveAspectRatio="xMidYMin meet"></svg>
       <span id="ar-t" class="sr">BTG Forge architecture diagram</span>
-      <span id="ar-d" class="sr">Five stacked layers: hooks (session-start, pre-commit); ten forge commands; agents grouped into the shared gate evaluator, the BMAD quartet, the TDD pair, the review trio, and the standalone mcp-connector utility; four skills; and the .forge state folder holding the constitution, preferences, learnings, patterns, living specs, per-change artifacts and the archive.</span>
+      <span id="ar-d" class="sr">Five stacked layers: hooks (session-start, pre-commit); ten forge commands; agents grouped into the shared gate evaluator, the brainstormer ideation agent, the BMAD quartet, the TDD pair, the review trio, and the standalone mcp-connector utility; four skills; and the .forge state folder holding the constitution, preferences, learnings, patterns, living specs, per-change artifacts and the archive.</span>
     </div>
       <div class="legend">
         <span class="k"><span class="sw cmd"></span>command</span>
         <span class="k"><span class="sw acc"></span>invokes</span>
+        <span class="k"><span class="sw adv"></span>ideation (advisory)</span>
         <span class="k"><span class="sw state"></span>reads / writes state</span>
         <span class="k"><span class="sw cond"></span>follows skill</span>
       </div>
@@ -312,6 +319,13 @@ function gbox(svg,x,y,w,h){svgEl('rect',{class:'groupbox',x,y,width:w,height:h,r
   const analyze=node(svg,{cls:'cmd cond',x:70,y:712+5,w:170,h:44,tag:'analyze',sub:'spec⇄plan⇄tasks · advisory'});
   edge(svg,[analyze._a.r,{x:cmds['verify']._a.l.x,y:analyze._a.r.y}],{cls:'cond',label:'consistency',labelAt:{x:(analyze._a.r.x+cmds['verify']._a.l.x)/2,y:analyze._a.r.y-10}});
 
+  // ---- brainstormer — read-only ideation feeding specify + plan (upper-left, clear of BMAD) ----
+  const brain=node(svg,{cls:'ideate',x:64,y:200,w:168,h:40,tag:'brainstormer',sub:'diverge → converge'});
+  // brainstormer -> specify (frame the problem)
+  edge(svg,[{x:brain._a.r.x,y:210},{x:290,y:210},{x:290,y:197},{x:cmds['specify'].x,y:197}],{cls:'adv',label:'frame',labelAt:{x:261,y:201}});
+  // brainstormer -> plan (weigh approaches at triage), enter plan upper-left (y=332)
+  edge(svg,[{x:brain._a.r.x,y:230},{x:300,y:230},{x:300,y:332},{x:cmds['plan'].x,y:332}],{cls:'adv',label:'weigh',labelAt:{x:270,y:223}});
+
   // ---- BMAD escalation branch (left of plan) ----
   const BX=64,BW=168,BH=44;
   const bm=[
@@ -320,13 +334,14 @@ function gbox(svg,x,y,w,h){svgEl('rect',{class:'groupbox',x,y,width:w,height:h,r
     ['architect','architect','architecture doc',384],
     ['po','po','shard + PO checklist',438],
   ].map(([id,tag,sub,y])=>node(svg,{cls:'bmad',x:BX,y,w:BW,h:BH,tag,sub}));
-  // plan -> analyst (HIGH)
-  const pL=cmds['plan']._a.l;
+  // plan -> analyst (HIGH) — leave plan lower-left so brainstormer can enter upper-left
+  const pL={x:cmds['plan'].x,y:cmds['plan'].y+34};
   edge(svg,[pL,{x:BX+BW+26,y:pL.y},{x:BX+BW+26,y:bm[0]._a.t.y-0},{x:bm[0]._a.cx,y:bm[0]._a.t.y}],{cls:'bmad',label:'HIGH',labelAt:{x:BX+BW+26,y:(pL.y+bm[0].y)/2-6},dx:0,dy:0});
   // chain analyst->pm->architect->po
   for(let i=0;i<bm.length-1;i++){edge(svg,[bm[i]._a.b,{x:bm[i]._a.b.x,y:bm[i+1]._a.t.y}],{cls:'bmad'});}
   // po -> rejoin plan/G2 spine
-  edge(svg,[bm[3]._a.r,{x:BX+BW+26,y:bm[3]._a.r.y},{x:BX+BW+26,y:cmds['plan']._a.l.y+6},{x:cmds['plan']._a.l.x,y:cmds['plan']._a.l.y+6}],{cls:'bmad',label:'stories → G2',labelAt:{x:(BX+BW+26+cmds['plan'].x)/2,y:cmds['plan']._a.l.y+6-10}});
+  const poY=cmds['plan'].y+44;
+  edge(svg,[bm[3]._a.r,{x:BX+BW+26,y:bm[3]._a.r.y},{x:BX+BW+26,y:poY},{x:cmds['plan'].x,y:poY}],{cls:'bmad',label:'stories → G2',labelAt:{x:(BX+BW+26+cmds['plan'].x)/2,y:poY-10}});
   glabel(svg,BX,258,'BMAD tier · escalate');
   gbox(svg,BX-14,266,BW+28,438-276+BH+14);
 })();
@@ -353,27 +368,27 @@ function gbox(svg,x,y,w,h){svgEl('rect',{class:'groupbox',x,y,width:w,height:h,r
   const cmd={}; let cxp=46;
   cnames.forEach(n=>{const w=n.length*8.6+30; cmd[n]=chip(cxp,176,n,'cmd',w); cxp+=w+11;});
 
-  // ---- Layer 3: Agents ----
+  // ---- Layer 3: Agents (auto-laid-out clusters, left→right) ----
   glabel(svg,40,282,'Agents · .claude/agents/');
-  const AY=300, AH=150;
-  // clusters
+  const AY=300, AH=150, GAP=24;
   const clusters=[
-    {label:'GATE',x:40,w:150,items:[['gate','G0–G5 evaluator']]},
-    {label:'BMAD QUARTET',x:206,w:250,items:[['analyst',''],['pm',''],['architect',''],['po','']]},
-    {label:'TDD',x:472,w:210,items:[['tdd-engineer','RED'],['impl-engineer','GREEN']]},
-    {label:'REVIEW',x:690,w:238,items:[['reviewer',''],['qa-gate',''],['pr-reviewer','']]},
-    {label:'UTILITY',x:978,w:184,items:[['mcp-connector','wire / build MCP']]},
+    {label:'GATE',        w:130,cls:'',       items:['gate']},
+    {label:'IDEATION',    w:140,cls:'ideate', items:['brainstormer']},
+    {label:'BMAD QUARTET',w:200,cls:'bmad',   items:['analyst','pm','architect','po']},
+    {label:'TDD',         w:180,cls:'',       items:['tdd-engineer','impl-engineer']},
+    {label:'REVIEW',      w:200,cls:'',       items:['reviewer','qa-gate','pr-reviewer']},
+    {label:'UTILITY',     w:150,cls:'util',   items:['mcp-connector']},
   ];
+  let ax=40; clusters.forEach(c=>{c.x=ax; ax+=c.w+GAP;});
   const ag={}, clA={};
   clusters.forEach(c=>{
     gbox(svg,c.x-12,AY-4,c.w+24,AH);
     glabel(svg,c.x-6,AY-10,c.label);
     clA[c.label]={cx:c.x+c.w/2, top:AY-4, bottom:AY-4+AH};
     let iy=AY+10;
-    c.items.forEach(([id,sub])=>{
-      const cls=c.label==='BMAD QUARTET'?'bmad':c.label==='UTILITY'?'util':'';
-      ag[id]=node(svg,{cls,x:c.x,y:iy,w:c.w,h:sub?30:26,tag:id,rx:7,sub:null});
-      iy+=(sub?34:31);
+    c.items.forEach(id=>{
+      ag[id]=node(svg,{cls:c.cls,x:c.x,y:iy,w:c.w,h:26,tag:id,rx:7});
+      iy+=31;
     });
   });
 
@@ -406,6 +421,7 @@ function gbox(svg,x,y,w,h){svgEl('rect',{class:'groupbox',x,y,width:w,height:h,r
   const toCluster=(from,label,cls,txt,cy=262)=>{const a=from._a.b,t=clA[label];
     edge(svg,[a,{x:a.x,y:cy},{x:t.cx,y:cy},{x:t.cx,y:t.top}],{cls:cls||'',label:txt});};
   toCluster(cmd['specify'],'GATE','','all → gate');
+  toCluster(cmd['specify'],'IDEATION','adv','ideate');
   toCluster(cmd['plan'],'BMAD QUARTET','bmad','HIGH');
   toCluster(cmd['implement'],'TDD','','RED→GREEN');
   toCluster(cmd['pr-review'],'REVIEW','','G5 review');

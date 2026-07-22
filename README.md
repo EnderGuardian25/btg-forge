@@ -28,7 +28,11 @@ the middle; ends with a human-approved PR-review merge gate on GitHub.
 ```
 
 Every gate returns **`PASS`** · **`CONCERNS`** (advisory) · **`FAIL`** (blocks unless a `Justification:`
-is recorded in `changes/<feature>/gates.md`).
+is recorded in `changes/<feature>/gates.md`). The read-only `brainstormer` agent can widen the option
+space before `/forge:specify` and at `/forge:plan` triage; it proposes, never decides.
+
+> **Diagrams:** open [`docs/forge-diagrams.html`](docs/forge-diagrams.html) for the full pipeline and
+> architecture diagrams (all commands, gates, the BMAD escalation, and every agent).
 
 ## Install
 
@@ -40,8 +44,10 @@ is recorded in `changes/<feature>/gates.md`).
 ## Layout
 
 - `.claude/commands/forge/*` — the pipeline commands (`/forge:*`).
-- `.claude/agents/*` — subagents: planning (`analyst/pm/architect/po`), execution (`tdd-engineer/
-  impl-engineer`), quality (`reviewer/qa-gate`), the generic `gate`, and `pr-reviewer` (G5).
+- `.claude/agents/*` — subagents: the generic `gate` (G0–G5), planning (`analyst/pm/architect/po`),
+  execution (`tdd-engineer/impl-engineer`), quality (`reviewer/qa-gate`), `pr-reviewer` (G5), the read-only
+  `brainstormer` (divergent-then-convergent ideation feeding `specify`/`plan`), and `mcp-connector`
+  (wire an existing MCP server into `.mcp.json`, or scaffold a new TypeScript one).
 - `.claude/skills/*` — `tdd-loop`, `verification-before-completion`, `systematic-debugging`,
   `github-escalation` (the G5 blocked-merge discipline).
 - `.claude/hooks/*` — `session-start.sh` (bootstrap), `pre-commit.sh` (G4 hard gate).
