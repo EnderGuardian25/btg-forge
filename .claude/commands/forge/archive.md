@@ -4,15 +4,35 @@ argument-hint: <feature-name>
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
 ---
 
-# /forge:archive — STUB (Owner: Member D)
+# /forge:archive — fold the accepted change back into current truth (Member D)
 
-> Skeleton stub created by Member A for parallel build. Member D fills the body.
+Runs after the change has merged. Applies the delta `spec.md` to the living `.forge/specs/` (the new current
+truth), records what we learned, and retires the change folder.
 
-## Contract
-- **Reads:** `changes/<feature>/spec.md` (delta), `.forge/specs/**`.
-- **Writes:** applies ADDED/MODIFIED/REMOVED into `.forge/specs/<domain>/spec.md` (new current truth);
-  appends to `.forge/learnings.md` and `.forge/patterns.md`; moves the change to `changes/archive/`.
-- **Gate:** none.
-- **Subagents/skills:** none required.
+## Reads
+- `changes/<feature>/spec.md` (the ADDED/MODIFIED/REMOVED delta), `proposal.md`, `verify-report.md`, `gates.md`.
+- `.forge/specs/**` (current truth).
 
-TODO(D): implement (stretch).
+## Writes
+- `.forge/specs/<domain>/spec.md` — apply the delta:
+  - **ADDED** → insert the requirement.
+  - **MODIFIED** → replace the existing requirement's text (keep its id stable).
+  - **REMOVED** → delete the requirement.
+- `.forge/learnings.md` — append a dated entry: what was tricky, what we'd do differently.
+- `.forge/patterns.md` — append any reusable pattern this change established.
+- Moves `changes/<feature>/` → `changes/archive/<feature>/`.
+
+## Steps
+1. **Refuse to archive an unfinished change:** `verify-report.md` must be all MET and `gates.md` must show a
+   G5 PASS (or a recorded `Justification:`). If not, stop and say why.
+2. Pick the target `specs/<domain>/` from the requirement ids / proposal; create it if the domain is new.
+3. Apply ADDED/MODIFIED/REMOVED against current truth; keep requirement ids stable.
+4. Append learnings + patterns — skip a section if there's nothing genuinely new (no filler).
+5. `git mv` the change folder into `changes/archive/`.
+6. Print a summary: requirements added/modified/removed, files touched, learnings recorded.
+
+## Gate
+None.
+
+## Subagents/skills
+None required.
