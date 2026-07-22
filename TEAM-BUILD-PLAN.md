@@ -157,7 +157,8 @@ conflict proposals) is a bonus to show if time allows.
 - [x] *(bonus)* artifact templates in `.forge/templates/` (spec/plan/tasks/story/gates/proposal/verify-report) so B/C/D write to a shared shape.
 - [x] *(bonus)* `CLAUDE.md` working agreement + the cross-device "check off your tasks" rule.
 - [x] *(wiring)* `pr-reviewer.md` now invokes the `github-escalation` skill whenever the G5 gate is blocked. *(D still owns the `pr-review.md` body.)*
-**Done when:** `/forge:init` scaffolds a clean repo, the session hook fires, and `gate.md` returns a valid verdict on a sample artifact. ✅ skeleton pushed to `main` — B/C/D can branch.
+- [x] *(validation)* `scripts/forge-smoke.sh` — repeatable spine check (settings JSON, frontmatter, both hooks). Green. `gate` subagent verified end-to-end: PASS on a clean spec, FAIL on a spec with `[NEEDS CLARIFICATION]`.
+**Done when:** `/forge:init` scaffolds a clean repo, the session hook fires, and `gate.md` returns a valid verdict on a sample artifact. ✅ skeleton pushed to `main`; hooks + gate contract validated on `feat/A-spine`.
 
 ### Member B — Planning tier (spec-kit + BMAD + OpenSpec deltas)
 **Owns:** `commands/forge/specify.md`, `clarify.md`, `plan.md`; `agents/analyst.md`, `pm.md`,
