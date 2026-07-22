@@ -185,13 +185,13 @@ conflict proposals) is a bonus to show if time allows.
 `agents/reviewer.md`, `qa-gate.md`, `pr-reviewer.md`; `skills/github-escalation/SKILL.md`;
 **the demo target app + running the demo**.
 **Tasks**
-- [ ] `analyze.md`: cross-artifact consistency (spec⇄plan⇄tasks) → CRITICAL/WARNING/SUGGESTION (advisory).
-- [ ] `verify.md`: quote **exact `spec.md` acceptance lines** and check each → `verify-report.md`.
-- [ ] `reviewer.md`: two-stage review (spec compliance → code quality). `qa-gate.md`: PASS/CONCERNS/FAIL.
-- [ ] `archive.md`: merge spec deltas into `specs/`; append `learnings.md` / `patterns.md`; move change to `archive/`.
-- [ ] **`pr-review.md` + `pr-reviewer.md` (G5):** on a GitHub PR into `main` (via `gh`): post a **summary**, run reviewer + qa-gate → post `PASS/CONCERNS/FAIL`, detect conflicts and **propose per-hunk resolutions with rationale for a human to approve** (never auto-commit a resolution).
+- [x] `analyze.md`: cross-artifact consistency (spec⇄plan⇄tasks) → CRITICAL/WARNING/SUGGESTION (advisory).
+- [x] `verify.md`: quote **exact `spec.md` acceptance lines** and check each → `verify-report.md`.
+- [x] `reviewer.md`: two-stage review (spec compliance → code quality). `qa-gate.md`: PASS/CONCERNS/FAIL.
+- [x] `archive.md`: merge spec deltas into `specs/`; append `learnings.md` / `patterns.md`; move change to `archive/`.
+- [x] **`pr-review.md` + `pr-reviewer.md` (G5):** on a GitHub PR into `main` (via `gh`): post a **summary**, run reviewer + qa-gate → post `PASS/CONCERNS/FAIL`, detect conflicts and **propose per-hunk resolutions with rationale for a human to approve** (never auto-commit a resolution). *(pr-reviewer body filled; A's escalation wiring kept intact.)*
 - [x] **`github-escalation/SKILL.md`:** the discipline the G5 gate follows when blocked (FAIL/CONCERNS, red checks, semantic conflict, spec drift) — gather context via `gh`, post a structured escalation summary + options to the PR and `gates.md`, then **stop and wait for a human choice**. Never merges or resolves semantic conflicts autonomously. *(Authored + ✅ wired by A: `agents/pr-reviewer.md` invokes it. D still owns the `pr-review.md` command body.)*
-- [ ] Pre-stage the **demo feature** by ~0:50 so the final demo isn't invented live.
+- [x] Pre-stage the **demo feature** by ~0:50 so the final demo isn't invented live. *(demo/health-app: zero-dep Node target app + pre-staged 003-health spec/plan/tasks, G0–G2 PASS, RED left for the live TDD step.)*
 **Done when:** `/forge:verify` produces a report quoting spec lines, `qa-gate` returns a verdict, and `/forge:pr-review <PR#>` posts a summary + verdict + a proposed conflict resolution on a real GitHub PR.
 
 ---
