@@ -27,8 +27,9 @@ never touch implementation code, no matter how small the fix looks.
 
 ## Output
 - The new test file/diff.
-- A short RED confirmation: the command you ran + the relevant failure excerpt + why this is the correct
-  failure.
+- **RED evidence** — the command you ran + the verbatim failure excerpt + one line on why this is the
+  correct failure. This text is what the read-only G3 gate judges (it can't run tests itself), so it must
+  stand on its own: quote the actual assertion/error, don't just say "it failed."
 
 ## Rules
 - Follow the `tdd-loop` skill.

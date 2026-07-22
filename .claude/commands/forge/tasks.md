@@ -15,6 +15,9 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
 - **Subagents/skills:** none required.
 
 ## Process
+0. **Precondition:** `changes/<feature>/plan.md` must exist and carry a passing/CONCERNS G1 (and, if HIGH,
+   G2) verdict in `changes/<feature>/gates.md`. If `plan.md` is missing, stop and tell the user to run
+   `/forge:plan <feature>` first — don't derive tasks straight from the spec.
 1. Read `changes/<feature>/plan.md`. If `## Complexity Triage` says **HIGH**, also read every
    `changes/<feature>/stories/NN-*.md`.
 2. Derive the unit of work:
@@ -26,7 +29,9 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task
    - **Wave 1** — tasks with no dependency on another task in this feature. Mark `[P]` when more than one
      can proceed independently within the wave.
    - **Wave N+1** — tasks that depend on a completed Wave N task (an earlier interface, a shared module,
-     migration ordering, etc.).
+     migration ordering, etc.). Name the depended-on task so the wave boundary is auditable.
+   - Number tasks continuously across waves (Wave 1: 1,2; Wave 2: 3,4…), matching
+     `.forge/templates/tasks.md`.
    - Prefer more waves of few tasks over few waves of many — `/forge:implement` commits one task at a
      time, so smaller tasks stay reviewable.
 4. Each task line must name the file(s) it touches and a concrete verification step (a test command, or
