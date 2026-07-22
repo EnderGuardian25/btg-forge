@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BTG Forge — Pipeline &amp; Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#E7EDF3; --panel:#FFFFFF; --panel-2:#F3F7FB; --line:#C4D1DE; --grid:#D7E0EA;
+    --text:#152430; --muted:#57697A;
+    --ink:#123B63;            /* commands / spine */
+    --ink-soft:#2C5480;
+    --accent:#1E6FE0;         /* connectors / interactive */
+    --bmad:#7A4FE0;           /* BMAD escalation tier */
+    --state:#0E8290;          /* .forge state */
+    --pass:#1C8A56; --concern:#B9820F; --fail:#C33F2F;
+    --chip:#EEF3F9;
+    --shadow:0 1px 2px rgba(20,40,60,.08), 0 8px 30px rgba(20,40,60,.06);
+    --display:'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --mono:'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0C141F; --panel:#141E2B; --panel-2:#101825; --line:#28394D; --grid:#1A2536;
+      --text:#E7EDF4; --muted:#93A6BA;
+      --ink:#8CB6E8; --ink-soft:#B7D2F2;
+      --accent:#4C93FF; --bmad:#A98CFF; --state:#38B7C0;
+      --pass:#37B37B; --concern:#DFA83C; --fail:#E56A57;
+      --chip:#1B2937;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 34px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--body); line-height:1.6; letter-spacing:.005em;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1240px; margin:0 auto; padding:clamp(28px,5vw,72px) clamp(18px,4vw,48px) 96px}
+
+  /* ---------- masthead ---------- */
+  header.mast{position:relative; padding-bottom:34px; margin-bottom:8px;
+    border-bottom:1.5px solid var(--line)}
+  .eyebrow{font-family:var(--mono); font-size:.72rem; font-weight:600;
+    letter-spacing:.28em; text-transform:uppercase; color:var(--accent); margin:0 0 14px}
+  h1{font-family:var(--display); font-weight:700; letter-spacing:-.02em;
+    font-size:clamp(2.1rem,5.4vw,3.5rem); line-height:1.02; margin:0 0 16px}
+  h1 .thin{color:var(--muted); font-weight:500}
+  .lede{max-width:60ch; font-size:clamp(1rem,1.6vw,1.12rem); color:var(--muted); margin:0}
+  .pipe-line{font-family:var(--mono); font-size:.82rem; color:var(--ink-soft);
+    margin-top:22px; padding:12px 16px; background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; overflow-x:auto; white-space:nowrap}
+  .pipe-line b{color:var(--accent)}
+
+  /* ---------- section ---------- */
+  section{margin-top:clamp(48px,7vw,88px)}
+  .sec-head{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:6px}
+  .sec-num{font-family:var(--mono); font-weight:600; color:var(--accent); font-size:.9rem}
+  h2{font-family:var(--display); font-weight:600; letter-spacing:-.015em;
+    font-size:clamp(1.5rem,3.2vw,2.15rem); margin:0}
+  .sec-sub{color:var(--muted); max-width:66ch; margin:8px 0 26px; font-size:1rem}
+
+  .board{background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    box-shadow:var(--shadow); padding:14px}
+  .board .scroll{overflow-x:auto; overflow-y:hidden}
+  svg{display:block; width:100%; height:auto; min-width:640px}
+
+  /* ---------- svg node styling ---------- */
+  .nbox{fill:var(--panel); stroke:var(--line); stroke-width:1.5}
+  .cmd .nbox{stroke:var(--ink); stroke-width:2; fill:var(--panel)}
+  .cmd .ntag{fill:var(--ink)}
+  .util .nbox{stroke:var(--accent); stroke-dasharray:0}
+  .bmad .nbox{stroke:var(--bmad); fill:var(--panel)}
+  .bmad .ntag{fill:var(--bmad)}
+  .state .nbox{stroke:var(--state)}
+  .state .ntag{fill:var(--state)}
+  .cond .nbox{stroke:var(--muted); stroke-dasharray:5 4; fill:var(--panel-2)}
+  .cond .ntag{fill:var(--muted)}
+
+  .ntag{font-family:var(--mono); font-weight:600; font-size:14px}
+  .nsub{font-family:var(--body); font-weight:400; font-size:10.5px; fill:var(--muted)}
+  .grouplabel{font-family:var(--mono); font-weight:600; font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; fill:var(--muted)}
+  .groupbox{fill:none; stroke:var(--line); stroke-width:1.2; stroke-dasharray:2 4; rx:12}
+
+  /* gate chip */
+  .gate .gbox{fill:var(--panel); stroke:var(--ink-soft); stroke-width:1.5}
+  .gate .gid{font-family:var(--mono); font-weight:700; font-size:14px; fill:var(--ink)}
+  .gate .gname{font-family:var(--body); font-size:11px; fill:var(--muted)}
+  .gate .gstrip{fill:var(--ink-soft)}
+
+  /* edges */
+  .edge{fill:none; stroke:var(--accent); stroke-width:2}
+  .edge.state{stroke:var(--state)}
+  .edge.bmad{stroke:var(--bmad)}
+  .edge.cond{stroke:var(--muted); stroke-width:1.6; stroke-dasharray:5 4}
+  .edge.bus{stroke:var(--line); stroke-width:1.5}
+  .elabel{font-family:var(--mono); font-size:10.5px; font-weight:500; fill:var(--muted)}
+  .elabel-bg{fill:var(--panel)}
+
+  /* legend */
+  .legend{display:flex; flex-wrap:wrap; gap:10px 22px; margin-top:22px;
+    font-size:.86rem; color:var(--muted); align-items:center}
+  .legend .k{display:inline-flex; align-items:center; gap:9px}
+  .sw{width:26px; height:0; border-top-width:2.5px; border-top-style:solid; display:inline-block}
+  .sw.cmd{border-color:var(--ink)} .sw.acc{border-color:var(--accent)}
+  .sw.bmad{border-color:var(--bmad)} .sw.state{border-color:var(--state)}
+  .sw.cond{border-color:var(--muted); border-top-style:dashed}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .dot.pass{background:var(--pass)} .dot.concern{background:var(--concern)} .dot.fail{background:var(--fail)}
+  .note{margin-top:16px; padding:13px 16px; border-left:3px solid var(--concern);
+    background:var(--panel-2); border-radius:0 10px 10px 0; font-size:.9rem; color:var(--text)}
+  .note code, .lede code, .sec-sub code{font-family:var(--mono); font-size:.85em;
+    background:var(--chip); padding:1px 6px; border-radius:5px}
+
+  footer{margin-top:80px; padding-top:24px; border-top:1.5px solid var(--line);
+    color:var(--muted); font-size:.84rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <p class="eyebrow">BTG Forge · System Reference</p>
+    <h1>Gate-driven, spec-driven<br><span class="thin">developer for Claude Code.</span></h1>
+    <p class="lede">Every unit of work travels one rail — from a plain-English request to a reviewed pull
+      request — passing six honest gates. Lightweight by default; it escalates to heavier BMAD planning
+      only when complexity earns it, and enforces test-first discipline in the middle.</p>
+    <div class="pipe-line">init → specify <b>[G0]</b> → clarify → plan <b>[G1/G2]</b> → tasks → implement <b>[G3]</b> → verify <b>[G4]</b> → archive → pr-review <b>[G5]</b></div>
+  </header>
+
+  <!-- ============ PIPELINE ============ -->
+  <section aria-labelledby="pl-h">
+    <div class="sec-head"><span class="sec-num">01</span><h2 id="pl-h">The pipeline</h2></div>
+    <p class="sec-sub">All ten commands on a single spine. Gates hang to the right as checkpoints; the
+      <strong>BMAD escalation</strong> branches left off <code>plan</code> when triage returns HIGH.
+      Connectors are strictly horizontal &amp; vertical.</p>
+    <div class="board"><div class="scroll">
+      <svg id="pipeline" role="img" aria-labelledby="pl-t pl-d" preserveAspectRatio="xMidYMin meet"></svg>
+      <span id="pl-t" class="sr">BTG Forge pipeline diagram</span>
+      <span id="pl-d" class="sr">A vertical spine of commands — init, specify, plan, tasks, implement, verify, archive, pr-review — with gates G0 through G5 as checkpoints on the right, a conditional clarify loop on gate G0, an advisory analyze step feeding gate G4, and a BMAD escalation branch (analyst, pm, architect, po) on the left off the plan command.</span>
+    </div>
+      <div class="legend">
+        <span class="k"><span class="sw cmd"></span>command</span>
+        <span class="k"><span class="sw acc"></span>flow</span>
+        <span class="k"><span class="sw bmad"></span>BMAD tier (HIGH)</span>
+        <span class="k"><span class="sw cond"></span>conditional / advisory</span>
+        <span class="k"><span class="dot pass"></span><span class="dot concern"></span><span class="dot fail"></span>&nbsp;gate = PASS · CONCERNS · FAIL</span>
+      </div>
+      <div class="note">A <strong>FAIL</strong> stops the pipeline. It may only proceed if a human writes a
+        <code>Justification:</code> line into <code>changes/&lt;feature&gt;/gates.md</code> — the complexity-tracking escape hatch.</div>
+    </div>
+  </section>
+
+  <!-- ============ ARCHITECTURE ============ -->
+  <section aria-labelledby="ar-h">
+    <div class="sec-head"><span class="sec-num">02</span><h2 id="ar-h">The architecture</h2></div>
+    <p class="sec-sub">Five layers packaged under <code>.claude/</code> and <code>.forge/</code>. Commands
+      orchestrate; agents do the specialized work; skills encode discipline; hooks bracket the session;
+      the <code>.forge/</code> state folder is the single source of truth every stage reads and writes.</p>
+    <div class="board"><div class="scroll">
+      <svg id="arch" role="img" aria-labelledby="ar-t ar-d" preserveAspectRatio="xMidYMin meet"></svg>
+      <span id="ar-t" class="sr">BTG Forge architecture diagram</span>
+      <span id="ar-d" class="sr">Five stacked layers: hooks (session-start, pre-commit); ten forge commands; agents grouped into the shared gate evaluator, the BMAD quartet, the TDD pair, the review trio, and the standalone mcp-connector utility; four skills; and the .forge state folder holding the constitution, preferences, learnings, patterns, living specs, per-change artifacts and the archive.</span>
+    </div>
+      <div class="legend">
+        <span class="k"><span class="sw cmd"></span>command</span>
+        <span class="k"><span class="sw acc"></span>invokes</span>
+        <span class="k"><span class="sw state"></span>reads / writes state</span>
+        <span class="k"><span class="sw cond"></span>follows skill</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>BTG Forge — <span style="font-family:var(--mono)">.claude/</span> commands · agents · skills · hooks + <span style="font-family:var(--mono)">.forge/</span> state</span>
+    <span>Diagram reference · orthogonal routing</span>
+  </footer>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const svgEl=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;};
+
+/* shared defs: arrowheads + blueprint dot grid */
+function defs(svg){
+  const d=svgEl('defs',{},svg);
+  [['arrow','var(--accent)'],['arrow-bmad','var(--bmad)'],['arrow-state','var(--state)'],['arrow-cond','var(--muted)']].forEach(([id,c])=>{
+    const m=svgEl('marker',{id,viewBox:'0 0 10 10',refX:8.5,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'},d);
+    svgEl('path',{d:'M0 0 L10 5 L0 10 z',fill:c},m);
+  });
+  const pat=svgEl('pattern',{id:'dots',width:26,height:26,patternUnits:'userSpaceOnUse'},d);
+  svgEl('circle',{cx:1.3,cy:1.3,r:1.3,fill:'var(--grid)'},pat);
+}
+const anc=n=>({cx:n.x+n.w/2,cy:n.y+n.h/2,
+  l:{x:n.x,y:n.y+n.h/2},r:{x:n.x+n.w,y:n.y+n.h/2},
+  t:{x:n.x+n.w/2,y:n.y},b:{x:n.x+n.w/2,y:n.y+n.h}});
+
+function node(svg,n){
+  const g=svgEl('g',{class:'node '+(n.cls||'')},svg);
+  svgEl('rect',{class:'nbox',x:n.x,y:n.y,width:n.w,height:n.h,rx:n.rx??9},g);
+  const cx=n.x+n.w/2;
+  if(n.sub){
+    svgEl('text',{class:'ntag',x:cx,y:n.y+n.h/2-6,'text-anchor':'middle','dominant-baseline':'middle'},g).textContent=n.tag;
+    const s=svgEl('text',{class:'nsub',x:cx,y:n.y+n.h/2+10,'text-anchor':'middle','dominant-baseline':'middle'},g);
+    s.textContent=n.sub;
+  }else{
+    svgEl('text',{class:'ntag',x:cx,y:n.y+n.h/2+1,'text-anchor':'middle','dominant-baseline':'middle'},g).textContent=n.tag;
+  }
+  n._a=anc(n); return n;
+}
+function gate(svg,n){
+  const g=svgEl('g',{class:'gate',},svg);
+  svgEl('rect',{class:'gbox',x:n.x,y:n.y,width:n.w,height:n.h,rx:9},g);
+  svgEl('rect',{class:'gstrip',x:n.x,y:n.y,width:6,height:n.h,rx:0},g);
+  svgEl('path',{class:'gstrip',d:`M${n.x} ${n.y} h6 v${n.h} h-6 z`,fill:'var(--ink-soft)'},g);
+  svgEl('text',{class:'gid',x:n.x+18,y:n.y+n.h/2-6,'dominant-baseline':'middle'},g).textContent=n.id;
+  svgEl('text',{class:'gname',x:n.x+18,y:n.y+n.h/2+11,'dominant-baseline':'middle'},g).textContent=n.name;
+  ['var(--pass)','var(--concern)','var(--fail)'].forEach((c,i)=>{
+    svgEl('circle',{cx:n.x+n.w-16,cy:n.y+13+i*13,r:4.2,fill:c},g);
+  });
+  n._a=anc(n); return n;
+}
+function edge(svg,pts,o={}){
+  const d='M '+pts.map(p=>`${p.x} ${p.y}`).join(' L ');
+  const cls='edge '+(o.cls||'');
+  const p=svgEl('path',{class:cls,d},svg);
+  if(o.arrow!==false){
+    const mk=o.cls&&o.cls.includes('bmad')?'arrow-bmad':o.cls&&o.cls.includes('state')?'arrow-state':o.cls&&o.cls.includes('cond')?'arrow-cond':'arrow';
+    p.setAttribute('marker-end',`url(#${mk})`);
+  }
+  if(o.label){
+    const m=o.labelAt||pts[pts.length-2]||pts[0];
+    const tx=m.x+(o.dx||0), ty=m.y+(o.dy||0);
+    const w=o.label.length*6.0+10;
+    svgEl('rect',{class:'elabel-bg',x:tx-w/2,y:ty-9,width:w,height:16,rx:4},svg);
+    svgEl('text',{class:'elabel',x:tx,y:ty,'text-anchor':'middle','dominant-baseline':'middle'},svg).textContent=o.label;
+  }
+}
+function glabel(svg,x,y,txt){svgEl('text',{class:'grouplabel',x,y},svg).textContent=txt;}
+function gbox(svg,x,y,w,h){svgEl('rect',{class:'groupbox',x,y,width:w,height:h,rx:12,fill:'none'},svg);}
+
+/* ================= PIPELINE ================= */
+(function(){
+  const svg=document.getElementById('pipeline');
+  const W=1000,H=1120;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  defs(svg);
+  svgEl('rect',{x:0,y:0,width:W,height:H,fill:'url(#dots)'},svg);
+
+  const CW=196,CH=54,cx=352;                 // command column
+  const GX=690,GW=196,GH=52;                 // gate column
+  const cmds={};
+  const seq=[
+    ['init','init','scaffold .forge/ + hooks',60],
+    ['specify','specify','delta spec · ADDED/MODIFIED/REMOVED',170],
+    ['plan','plan','complexity triage',322],
+    ['tasks','tasks','waves · [P] parallel',474],
+    ['implement','implement','per task: RED→GREEN→refactor→commit',586],
+    ['archive','archive','merge deltas → specs/ · learnings',826],
+    ['pr-review','pr-review','GitHub PR → main',938],
+  ];
+  // verify sits on spine between implement and archive
+  seq.splice(5,0,['verify','verify','quote each spec acceptance line',712]);
+  seq.forEach(([id,tag,sub,y])=>{cmds[id]=node(svg,{cls:'cmd',x:cx,y,w:CW,h:CH,tag,sub});});
+
+  // spine connectors (straight vertical)
+  const order=['init','specify','plan','tasks','implement','verify','archive','pr-review'];
+  for(let i=0;i<order.length-1;i++){
+    const a=cmds[order[i]]._a.b,b=cmds[order[i+1]]._a.t;
+    edge(svg,[a,{x:a.x,y:b.y}]);
+  }
+  // triage label on plan→tasks
+  svgEl('rect',{class:'elabel-bg',x:cx+CW/2-78,y:cmds['plan']._a.b.y+18,width:156,height:16,rx:4},svg);
+  svgEl('text',{class:'elabel',x:cx+CW/2,y:cmds['plan']._a.b.y+26,'text-anchor':'middle'},svg).textContent='LOW / MED → Lite plan.md';
+
+  // gates
+  const G={
+    G0:gate(svg,{id:'G0',name:'Spec-clarity',x:GX,y:170,w:GW,h:GH}),
+    G1:gate(svg,{id:'G1',name:'Constitution / Simplicity',x:GX,y:290,w:GW,h:GH}),
+    G2:gate(svg,{id:'G2',name:'PO / Plan-review',x:GX,y:360,w:GW,h:GH}),
+    G3:gate(svg,{id:'G3',name:'Test-first',x:GX,y:586,w:GW,h:GH}),
+    G4:gate(svg,{id:'G4',name:'Quality',x:GX,y:712,w:GW,h:GH}),
+    G5:gate(svg,{id:'G5',name:'Merge',x:GX,y:938,w:GW,h:GH}),
+  };
+  const toGate=(cmd,g,y)=>{const a=cmd._a.r; const b=g._a.l; const midx=(a.x+b.x)/2;
+    edge(svg,[a,{x:midx,y:a.y},{x:midx,y:b.y},b]);};
+  toGate(cmds['specify'],G.G0);
+  toGate(cmds['plan'],G.G1);
+  toGate(cmds['plan'],G.G2);
+  toGate(cmds['implement'],G.G3);
+  toGate(cmds['verify'],G.G4);
+  toGate(cmds['pr-review'],G.G5);
+
+  // G4 pre-commit note
+  svgEl('rect',{class:'elabel-bg',x:GX+8,y:G.G4.y+GH+8,width:184,height:16,rx:4},svg);
+  svgEl('text',{class:'elabel',x:GX+GW/2,y:G.G4.y+GH+16,'text-anchor':'middle'},svg).textContent='pre-commit hook · hard block';
+
+  // clarify — conditional loop off G0 (to the right/below)
+  const clarify=node(svg,{cls:'cmd cond',x:GX,y:82,w:GW,h:44,tag:'clarify',sub:'resolve [NEEDS CLARIFICATION]'});
+  // G0 -> clarify (up)  and clarify -> re-run G0
+  edge(svg,[{x:G.G0._a.r.x,y:G.G0.y+14},{x:GX+GW+22,y:G.G0.y+14},{x:GX+GW+22,y:clarify.y+22},{x:clarify._a.r.x,y:clarify.y+22}],{cls:'cond',label:'gaps',dx:0,dy:-10,labelAt:{x:GX+GW+22,y:(G.G0.y+14+clarify.y+22)/2}});
+  edge(svg,[clarify._a.l,{x:GX-20,y:clarify._a.l.y},{x:GX-20,y:G.G0._a.l.y-14},{x:G.G0._a.l.x,y:G.G0._a.l.y-14}],{cls:'cond',label:'re-run',labelAt:{x:GX-20,y:(clarify._a.l.y+G.G0._a.l.y-14)/2},dx:0,dy:0});
+
+  // analyze — advisory, left of verify, feeding G4 lane
+  const analyze=node(svg,{cls:'cmd cond',x:70,y:712+5,w:170,h:44,tag:'analyze',sub:'spec⇄plan⇄tasks · advisory'});
+  edge(svg,[analyze._a.r,{x:cmds['verify']._a.l.x,y:analyze._a.r.y}],{cls:'cond',label:'consistency',labelAt:{x:(analyze._a.r.x+cmds['verify']._a.l.x)/2,y:analyze._a.r.y-10}});
+
+  // ---- BMAD escalation branch (left of plan) ----
+  const BX=64,BW=168,BH=44;
+  const bm=[
+    ['analyst','analyst','brief',276],
+    ['pm','pm','PRD · FR/NFR · stories',330],
+    ['architect','architect','architecture doc',384],
+    ['po','po','shard + PO checklist',438],
+  ].map(([id,tag,sub,y])=>node(svg,{cls:'bmad',x:BX,y,w:BW,h:BH,tag,sub}));
+  // plan -> analyst (HIGH)
+  const pL=cmds['plan']._a.l;
+  edge(svg,[pL,{x:BX+BW+26,y:pL.y},{x:BX+BW+26,y:bm[0]._a.t.y-0},{x:bm[0]._a.cx,y:bm[0]._a.t.y}],{cls:'bmad',label:'HIGH',labelAt:{x:BX+BW+26,y:(pL.y+bm[0].y)/2-6},dx:0,dy:0});
+  // chain analyst->pm->architect->po
+  for(let i=0;i<bm.length-1;i++){edge(svg,[bm[i]._a.b,{x:bm[i]._a.b.x,y:bm[i+1]._a.t.y}],{cls:'bmad'});}
+  // po -> rejoin plan/G2 spine
+  edge(svg,[bm[3]._a.r,{x:BX+BW+26,y:bm[3]._a.r.y},{x:BX+BW+26,y:cmds['plan']._a.l.y+6},{x:cmds['plan']._a.l.x,y:cmds['plan']._a.l.y+6}],{cls:'bmad',label:'stories → G2',labelAt:{x:(BX+BW+26+cmds['plan'].x)/2,y:cmds['plan']._a.l.y+6-10}});
+  glabel(svg,BX,258,'BMAD tier · escalate');
+  gbox(svg,BX-14,266,BW+28,438-276+BH+14);
+})();
+
+/* ================= ARCHITECTURE ================= */
+(function(){
+  const svg=document.getElementById('arch');
+  const W=1200,H=980;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  defs(svg);
+  svgEl('rect',{x:0,y:0,width:W,height:H,fill:'url(#dots)'},svg);
+
+  const chip=(x,y,tag,cls,w=150,sub=null)=>node(svg,{cls:cls||'',x,y,w,h:sub?46:34,tag,sub,rx:8});
+
+  // ---- Layer 1: Hooks ----
+  glabel(svg,40,34,'Session hooks · .claude/hooks/');
+  const hStart=chip(40,46,'session-start.sh','util',210,'inject constitution + bootstrap');
+  const hCommit=chip(280,46,'pre-commit.sh','util',210,'G4 · tests green = hard block');
+
+  // ---- Layer 2: Commands ----
+  glabel(svg,40,150,'Commands · .claude/commands/forge/');
+  gbox(svg,30,160,W-60,64);
+  const cnames=['init','specify','clarify','plan','tasks','implement','analyze','verify','archive','pr-review'];
+  const cmd={}; let cxp=46;
+  cnames.forEach(n=>{const w=n.length*8.6+30; cmd[n]=chip(cxp,176,n,'cmd',w); cxp+=w+11;});
+
+  // ---- Layer 3: Agents ----
+  glabel(svg,40,282,'Agents · .claude/agents/');
+  const AY=300, AH=150;
+  // clusters
+  const clusters=[
+    {label:'GATE',x:40,w:150,items:[['gate','G0–G5 evaluator']]},
+    {label:'BMAD QUARTET',x:206,w:250,items:[['analyst',''],['pm',''],['architect',''],['po','']]},
+    {label:'TDD',x:472,w:210,items:[['tdd-engineer','RED'],['impl-engineer','GREEN']]},
+    {label:'REVIEW',x:690,w:238,items:[['reviewer',''],['qa-gate',''],['pr-reviewer','']]},
+    {label:'UTILITY',x:978,w:184,items:[['mcp-connector','wire / build MCP']]},
+  ];
+  const ag={}, clA={};
+  clusters.forEach(c=>{
+    gbox(svg,c.x-12,AY-4,c.w+24,AH);
+    glabel(svg,c.x-6,AY-10,c.label);
+    clA[c.label]={cx:c.x+c.w/2, top:AY-4, bottom:AY-4+AH};
+    let iy=AY+10;
+    c.items.forEach(([id,sub])=>{
+      const cls=c.label==='BMAD QUARTET'?'bmad':c.label==='UTILITY'?'util':'';
+      ag[id]=node(svg,{cls,x:c.x,y:iy,w:c.w,h:sub?30:26,tag:id,rx:7,sub:null});
+      iy+=(sub?34:31);
+    });
+  });
+
+  // ---- Layer 4: Skills ----
+  glabel(svg,40,AY+AH+38,'Skills · .claude/skills/');
+  const SY=AY+AH+52;
+  const skills={};
+  [['tdd-loop',40,220],['verification-before-completion',276,300],['systematic-debugging',592,230],['github-escalation',838,220]]
+    .forEach(([id,x,w])=>{skills[id]=chip(x,SY,id,'cond',w);});
+
+  // ---- Layer 5: State ----
+  const STY=SY+96;
+  glabel(svg,40,STY-14,'State · .forge/  (single source of truth)');
+  gbox(svg,30,STY,W-60,150);
+  const stTop=[['constitution.md',46],['technical-preferences.md',236],['learnings.md',470],['patterns.md',640]];
+  stTop.forEach(([t,x])=>chip(x,STY+16,t,'state',t.length*7.4+22));
+  const mcpFile=chip(820,STY+16,'.mcp.json','util',110); // written by mcp-connector
+  // specs + changes
+  const specs=node(svg,{cls:'state',x:46,y:STY+70,w:250,h:52,tag:'specs/<domain>/spec.md',rx:8,sub:'current truth (living)'});
+  const changes=node(svg,{cls:'state',x:320,y:STY+70,w:560,h:52,tag:'changes/<NNN-feature>/',rx:8,
+    sub:'proposal · spec · plan · tasks · stories · verify-report · gates  (+ prd/architecture)'});
+  const archive=node(svg,{cls:'state',x:904,y:STY+70,w:250,h:52,tag:'changes/archive/',rx:8,sub:'merged deltas'});
+
+  // ===== connectors (all orthogonal; routed at cluster edges to avoid crossing boxes) =====
+  // hooks: session-start bootstraps every session; pre-commit guards commits
+  edge(svg,[hStart._a.b,{x:hStart._a.b.x,y:148}],{cls:'bus',label:'every session'});
+  edge(svg,[hCommit._a.b,{x:hCommit._a.b.x,y:135},{x:cmd['implement']._a.t.x,y:135},cmd['implement']._a.t],{cls:'cond',label:'guards commits'});
+
+  // command -> AGENT CLUSTER (enter cluster at its top-center; corridor y between the two bands)
+  const toCluster=(from,label,cls,txt,cy=262)=>{const a=from._a.b,t=clA[label];
+    edge(svg,[a,{x:a.x,y:cy},{x:t.cx,y:cy},{x:t.cx,y:t.top}],{cls:cls||'',label:txt});};
+  toCluster(cmd['specify'],'GATE','','all → gate');
+  toCluster(cmd['plan'],'BMAD QUARTET','bmad','HIGH');
+  toCluster(cmd['implement'],'TDD','','RED→GREEN');
+  toCluster(cmd['pr-review'],'REVIEW','','G5 review');
+
+  // AGENT CLUSTER -> skill (leave cluster at its bottom-center; staggered corridor so lines never overlap)
+  const toSkill=(label,skill,cy)=>{const s=clA[label],b=skills[skill]._a.t;
+    edge(svg,[{x:s.cx,y:s.bottom},{x:s.cx,y:cy},{x:b.x,y:cy},b],{cls:'cond'});};
+  toSkill('TDD','tdd-loop',466);
+  toSkill('REVIEW','github-escalation',476);
+  toSkill('GATE','systematic-debugging',486);
+
+  // commands <-> .forge/ state — left-margin bus, clear of every box
+  const BUSX=20;
+  edge(svg,[{x:cmd['init'].x,y:200},{x:BUSX,y:200},{x:BUSX,y:changes._a.l.y},{x:30,y:changes._a.l.y}],{cls:'state'});
+  svgEl('rect',{class:'elabel-bg',x:34,y:234,width:118,height:15,rx:4},svg);
+  svgEl('text',{class:'elabel',x:93,y:242,'text-anchor':'middle','dominant-baseline':'middle',fill:'var(--state)'},svg).textContent='commands ⇄ .forge/';
+
+  // mcp-connector agent -> .mcp.json state file (right side, clear of skills)
+  edge(svg,[ag['mcp-connector']._a.b,{x:ag['mcp-connector']._a.b.x,y:STY-8},{x:mcpFile._a.t.x,y:STY-8},mcpFile._a.t],{cls:'state',label:'writes'});
+})();
+</script>
+</body>
+</html>
