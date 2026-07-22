@@ -100,6 +100,9 @@ the block to `changes/<feature>/gates.md`. A `FAIL` stops the pipeline unless th
   `settings.json` is shared — **Member A owns it; others hand A their hook/registration snippet**).
 - **Merge at 0:60:** everyone opens a PR into `main`; **Member A integrates**. We **dogfood `pr-reviewer`**
   to summarize and gate each PR.
+- **Track progress in this file (all devices):** when you finish a task, flip its `- [ ]` to `- [x]` in
+  **your own member section** and commit that edit alongside the work. This rule is enforced by `CLAUDE.md`,
+  which every member's session loads — so all four devices keep the plan current automatically.
 
 ---
 
@@ -144,14 +147,17 @@ conflict proposals) is a bonus to show if time allows.
 `hooks/session-start.sh`, `hooks/pre-commit.sh`, `settings.json`, `commands/forge/init.md`,
 `agents/gate.md`, top-level `README.md`.
 **Tasks**
-- [ ] 0:00–0:12 — create folder skeleton + stub every command/agent file with frontmatter; push to `main`.
-- [ ] `init.md`: scaffolds `.forge/` in a target repo, writes a starter `constitution.md`.
-- [ ] `constitution.md` + `technical-preferences.md`: BISTEC defaults (stack, conventions, anti-patterns).
-- [ ] `gate.md`: generic gate subagent — takes gate id + artifact + checklist → returns the verdict block; documents the complexity-tracking escape hatch.
-- [ ] `session-start.sh`: inject constitution + "you are running BTG Forge" bootstrap.
-- [ ] `pre-commit.sh`: **G4** — run tests; non-zero exit blocks commit.
-- [ ] `README.md`: install + the pipeline diagram above.
-**Done when:** `/forge:init` scaffolds a clean repo, the session hook fires, and `gate.md` returns a valid verdict on a sample artifact.
+- [x] 0:00–0:12 — create folder skeleton + stub every command/agent file with frontmatter; push to `main`. *(all 10 commands, 10 agents, 4 skills, hooks, settings, .forge/ tree + templates)*
+- [x] `init.md`: scaffolds `.forge/` in a target repo, writes a starter `constitution.md`.
+- [x] `constitution.md` + `technical-preferences.md`: BISTEC defaults (stack, conventions, anti-patterns).
+- [x] `gate.md`: generic gate subagent — takes gate id + artifact + checklist → returns the verdict block; documents the complexity-tracking escape hatch.
+- [x] `session-start.sh`: inject constitution + "you are running BTG Forge" bootstrap.
+- [x] `pre-commit.sh`: **G4** — run tests; non-zero exit blocks commit.
+- [x] `README.md`: install + the pipeline diagram above.
+- [x] *(bonus)* artifact templates in `.forge/templates/` (spec/plan/tasks/story/gates/proposal/verify-report) so B/C/D write to a shared shape.
+- [x] *(bonus)* `CLAUDE.md` working agreement + the cross-device "check off your tasks" rule.
+- [x] *(wiring)* `pr-reviewer.md` now invokes the `github-escalation` skill whenever the G5 gate is blocked. *(D still owns the `pr-review.md` body.)*
+**Done when:** `/forge:init` scaffolds a clean repo, the session hook fires, and `gate.md` returns a valid verdict on a sample artifact. ✅ skeleton pushed to `main` — B/C/D can branch.
 
 ### Member B — Planning tier (spec-kit + BMAD + OpenSpec deltas)
 **Owns:** `commands/forge/specify.md`, `clarify.md`, `plan.md`; `agents/analyst.md`, `pm.md`,
@@ -184,7 +190,7 @@ conflict proposals) is a bonus to show if time allows.
 - [ ] `reviewer.md`: two-stage review (spec compliance → code quality). `qa-gate.md`: PASS/CONCERNS/FAIL.
 - [ ] `archive.md`: merge spec deltas into `specs/`; append `learnings.md` / `patterns.md`; move change to `archive/`.
 - [ ] **`pr-review.md` + `pr-reviewer.md` (G5):** on a GitHub PR into `main` (via `gh`): post a **summary**, run reviewer + qa-gate → post `PASS/CONCERNS/FAIL`, detect conflicts and **propose per-hunk resolutions with rationale for a human to approve** (never auto-commit a resolution).
-- [ ] **`github-escalation/SKILL.md`:** the discipline the G5 gate follows when blocked (FAIL/CONCERNS, red checks, semantic conflict, spec drift) — gather context via `gh`, post a structured escalation summary + options to the PR and `gates.md`, then **stop and wait for a human choice**. Never merges or resolves semantic conflicts autonomously. *(Already authored in `.claude/skills/github-escalation/SKILL.md` — wire `pr-reviewer` to invoke it.)*
+- [x] **`github-escalation/SKILL.md`:** the discipline the G5 gate follows when blocked (FAIL/CONCERNS, red checks, semantic conflict, spec drift) — gather context via `gh`, post a structured escalation summary + options to the PR and `gates.md`, then **stop and wait for a human choice**. Never merges or resolves semantic conflicts autonomously. *(Authored + ✅ wired by A: `agents/pr-reviewer.md` invokes it. D still owns the `pr-review.md` command body.)*
 - [ ] Pre-stage the **demo feature** by ~0:50 so the final demo isn't invented live.
 **Done when:** `/forge:verify` produces a report quoting spec lines, `qa-gate` returns a verdict, and `/forge:pr-review <PR#>` posts a summary + verdict + a proposed conflict resolution on a real GitHub PR.
 
