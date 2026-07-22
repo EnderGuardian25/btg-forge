@@ -158,6 +158,8 @@ conflict proposals) is a bonus to show if time allows.
 - [x] *(bonus)* `CLAUDE.md` working agreement + the cross-device "check off your tasks" rule.
 - [x] *(wiring)* `pr-reviewer.md` now invokes the `github-escalation` skill whenever the G5 gate is blocked. *(D still owns the `pr-review.md` body.)*
 - [x] *(validation)* `scripts/forge-smoke.sh` — repeatable spine check (settings JSON, frontmatter, both hooks). Green. `gate` subagent verified end-to-end: PASS on a clean spec, FAIL on a spec with `[NEEDS CLARIFICATION]`.
+- [x] *(hardening)* `init.md` rewritten + proven on a **clean throwaway repo**: bundled starter skeleton at `.claude/templates/forge/` (so init is self-contained — the old "See .forge/… in this repo" was circular), Windows-safe pre-commit wiring (symlink→copy fallback) + a `.gitattributes` `*.sh eol=lf` guard, and idempotent no-clobber scaffolding. Verified: `.forge/` scaffolds, `git commit` fires the hook (blocks failing / allows passing), a team edit survives re-init.
+- [x] *(dogfood)* Walked `/health` through the frozen contract on the clean repo: proposal→spec→plan→tasks→RED→GREEN→verify. Real `gate` agent at each checkpoint — **G0 PASS, G1 PASS, G4 FAIL** (honestly blocked on unmet R-2, route not yet built). Per-task commit passed through the G4 pre-commit gate. Contract is coherent end-to-end; command *bodies* still owned by B/C/D.
 **Done when:** `/forge:init` scaffolds a clean repo, the session hook fires, and `gate.md` returns a valid verdict on a sample artifact. ✅ skeleton pushed to `main`; hooks + gate contract validated on `feat/A-spine`.
 
 ### Member B — Planning tier (spec-kit + BMAD + OpenSpec deltas)
