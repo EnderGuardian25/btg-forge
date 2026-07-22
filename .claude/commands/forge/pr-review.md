@@ -37,3 +37,9 @@ this command never runs `gh pr merge` and never resolves a semantic conflict on 
 ## Subagents/skills
 - `pr-reviewer` (drives the review + summary), which invokes `reviewer`, `qa-gate`, and the
   `github-escalation` skill when blocked. **Never auto-merges or auto-resolves a semantic conflict.**
+
+## Review model tier
+Select the `pr-reviewer` model (and let it pass the same to `reviewer`/`qa-gate`) from the feature's
+`## Complexity Triage` in `plan.md`, using the **same mapping `/forge:implement` uses** — LOW → `haiku`,
+MED → `sonnet`, HIGH → `opus` (default MED if the triage can't be found). Review effort then scales with
+the complexity of the change under review.

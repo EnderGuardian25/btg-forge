@@ -36,3 +36,8 @@ a `file:line`). Feeds the **G4 Quality** gate — any UNMET line is a FAIL condi
 
 ## Subagents/skills
 - `gate` (emits the G4 verdict), `qa-gate` (final quality verdict from `reviewer` findings + this report).
+
+## Review model tier
+Select the `qa-gate` subagent's model from the feature's `## Complexity Triage` in `plan.md`, using the
+**same mapping `/forge:implement` uses** — LOW → `haiku`, MED → `sonnet`, HIGH → `opus` (default MED if
+absent). Pass it as the subagent's `model` override so review depth scales with the change's complexity.
