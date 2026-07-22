@@ -173,11 +173,11 @@ conflict proposals) is a bonus to show if time allows.
 **Owns:** `commands/forge/tasks.md`, `implement.md`; `agents/tdd-engineer.md`, `impl-engineer.md`;
 `skills/tdd-loop/SKILL.md`.
 **Tasks**
-- [ ] `tasks.md`: read plan/stories → emit `tasks.md` with `[P]` markers grouped into `### Wave N`, each task naming files + a verification step.
-- [ ] `tdd-loop/SKILL.md`: red-green-refactor discipline; **delete any impl written before its test**.
-- [ ] `tdd-engineer.md`: writes ONE failing test (RED); asserts it fails for the right reason.
-- [ ] `impl-engineer.md`: minimal code to GREEN, then refactor; no new behavior without a test.
-- [ ] `implement.md`: per task → call **G3** (a RED test exists) → tdd-engineer → impl-engineer → one commit per task (per-task commit discipline).
+- [x] `tasks.md`: read plan/stories → emit `tasks.md` with `[P]` markers grouped into `### Wave N`, each task naming files + a verification step.
+- [x] `tdd-loop/SKILL.md`: red-green-refactor discipline; **delete any impl written before its test**.
+- [x] `tdd-engineer.md`: writes ONE failing test (RED); asserts it fails for the right reason.
+- [x] `impl-engineer.md`: minimal code to GREEN, then refactor; no new behavior without a test.
+- [x] `implement.md`: per task → call **G3** (a RED test exists) → tdd-engineer → impl-engineer → one commit per task (per-task commit discipline).
 **Done when:** `/forge:implement` on one task visibly goes RED → GREEN → refactor with a commit per task, and G3 blocks impl when no failing test exists.
 
 ### Member D — Quality, PR review & demo (specclaw + superpowers + gates)
