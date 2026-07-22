@@ -21,7 +21,7 @@
   "stats": {
     "features": 2,
     "archived": 0,
-    "gatesPassed": 6,
+    "gatesPassed": 7,
     "gatesConcerns": 0,
     "gatesFailed": 0,
     "openClarifications": 0
@@ -65,6 +65,17 @@
             "Plan ⇄ spec mutually consistent; triage ties back to the same three requirements."
           ],
           "justified": false
+        },
+        {
+          "id": "G3",
+          "gate": "G3 Test-first",
+          "verdict": "PASS",
+          "reasons": [
+            "`backend/test/merge.test.js` imports `mergeState` from worker.js; worker.js had no such export → genuine RED (missing behavior, not a syntax error).",
+            "Test file syntactically valid across R-1/R-2/R-2-reverse/R-3 cases; no impl written before the test.",
+            "After impl: `node --test` → tests 4, pass 4, fail 0 (independently re-run). RED→GREEN confirmed."
+          ],
+          "justified": false
         }
       ],
       "spec": {
@@ -95,12 +106,64 @@
         "tier": "LOW"
       },
       "tasks": {
-        "waves": [],
-        "count": 0
+        "waves": [
+          {
+            "n": 1,
+            "tasks": [
+              {
+                "num": 1,
+                "parallel": false,
+                "text": "Add the failing tests for `mergeState` (RED)",
+                "files": [
+                  "backend/test/merge.test.js"
+                ],
+                "verify": "`npm test` fails because `mergeState` is not exported yet (right reason, not a syntax error). Covers R-1 (union), R-2 (done=true wins), R-3 (learning OR + track incoming)."
+              }
+            ]
+          },
+          {
+            "n": 2,
+            "tasks": [
+              {
+                "num": 2,
+                "parallel": false,
+                "text": "Implement + export `mergeState(existing, incoming)` (GREEN)",
+                "files": [
+                  "backend/src/worker.js"
+                ],
+                "verify": "`npm test` passes all three cases."
+              },
+              {
+                "num": 3,
+                "parallel": false,
+                "text": "Wire `npm test` → `node --test`",
+                "files": [
+                  "backend/package.json"
+                ],
+                "verify": "`npm test` runs the new test file (not \"missing script: test\")."
+              }
+            ]
+          },
+          {
+            "n": 3,
+            "tasks": [
+              {
+                "num": 4,
+                "parallel": false,
+                "text": "Use `mergeState` in `handlePutState` (read existing → normalise incoming → merge → persist)",
+                "files": [
+                  "backend/src/worker.js"
+                ],
+                "verify": "`npm test` still green; existing smoke-test contract (`ok:true`, sizes) unchanged."
+              }
+            ]
+          }
+        ],
+        "count": 4
       },
       "verify": null,
-      "stage": "plan",
-      "next": "/forge:tasks 001-state-merge",
+      "stage": "implement",
+      "next": "/forge:verify 001-state-merge",
       "health": "PASS",
       "trace": [
         {

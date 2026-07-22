@@ -17,3 +17,8 @@
 - All three ADDED requirements traceable in Approach: R-1/R-2 = queue bullet, R-3 = learning + track bullets.
 - Plan stays within proposal Out-of-scope: no CRDT/timestamps, no frontend changes, no cross-device deletion.
 - Plan ⇄ spec mutually consistent; triage ties back to the same three requirements.
+
+### G3 Test-first — PASS
+- `backend/test/merge.test.js` imports `mergeState` from worker.js; worker.js had no such export → genuine RED (missing behavior, not a syntax error).
+- Test file syntactically valid across R-1/R-2/R-2-reverse/R-3 cases; no impl written before the test.
+- After impl: `node --test` → tests 4, pass 4, fail 0 (independently re-run). RED→GREEN confirmed.
