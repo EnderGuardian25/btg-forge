@@ -1,0 +1,53 @@
+name: Deploy Forge Dashboard
+
+# Rebuilds the dashboard from `.forge/` state and deploys it to GitHub Pages
+# on every push to main (i.e. whenever a feature/gate change merges).
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".forge/**"
+      - "demo/**"
+      - "dashboard/**"
+      - ".github/workflows/dashboard.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deploy at a time; newer pushes cancel in-flight builds.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Generate dashboard data
+        run: node dashboard/generate.mjs
+      - name: Stamp build time into data.json
+        run: |
+          STAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+          node -e "const f='dashboard/data.json';const d=require('./'+f);d.generatedAt='$STAMP';require('fs').writeFileSync(f,JSON.stringify(d,null,2));console.log('stamped',d.generatedAt);"
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
