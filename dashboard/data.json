@@ -21,7 +21,7 @@
   "stats": {
     "features": 2,
     "archived": 0,
-    "gatesPassed": 7,
+    "gatesPassed": 8,
     "gatesConcerns": 0,
     "gatesFailed": 0,
     "openClarifications": 0
@@ -74,6 +74,17 @@
             "`backend/test/merge.test.js` imports `mergeState` from worker.js; worker.js had no such export → genuine RED (missing behavior, not a syntax error).",
             "Test file syntactically valid across R-1/R-2/R-2-reverse/R-3 cases; no impl written before the test.",
             "After impl: `node --test` → tests 4, pass 4, fail 0 (independently re-run). RED→GREEN confirmed."
+          ],
+          "justified": false
+        },
+        {
+          "id": "G4",
+          "gate": "G4 Quality",
+          "verdict": "PASS",
+          "reasons": [
+            "R-1/R-2/R-3 acceptance lines each backed by a passing test in `merge.test.js` and the `mergeState` impl in `worker.js`.",
+            "`node --test` → 4/4 pass; verify-report shows 3/3 acceptance met, no UNMET line.",
+            "No spec violation or scope creep beyond the accepted delta."
           ],
           "justified": false
         }
@@ -161,9 +172,13 @@
         ],
         "count": 4
       },
-      "verify": null,
-      "stage": "implement",
-      "next": "/forge:verify 001-state-merge",
+      "verify": {
+        "checks": [],
+        "met": 0,
+        "total": 0
+      },
+      "stage": "verify",
+      "next": "/forge:pr-review <PR#>",
       "health": "PASS",
       "trace": [
         {
@@ -171,21 +186,21 @@
           "title": "Queue is unioned on merge",
           "section": "ADDED",
           "inTasks": false,
-          "verified": null
+          "verified": false
         },
         {
           "req": "R-2",
           "title": "Done flag survives merge (done=true wins)",
           "section": "ADDED",
           "inTasks": false,
-          "verified": null
+          "verified": false
         },
         {
           "req": "R-3",
           "title": "Learning flags are OR'd; track takes incoming",
           "section": "ADDED",
           "inTasks": false,
-          "verified": null
+          "verified": false
         }
       ]
     },

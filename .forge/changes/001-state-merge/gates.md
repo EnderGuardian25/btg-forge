@@ -22,3 +22,8 @@
 - `backend/test/merge.test.js` imports `mergeState` from worker.js; worker.js had no such export → genuine RED (missing behavior, not a syntax error).
 - Test file syntactically valid across R-1/R-2/R-2-reverse/R-3 cases; no impl written before the test.
 - After impl: `node --test` → tests 4, pass 4, fail 0 (independently re-run). RED→GREEN confirmed.
+
+### G4 Quality — PASS
+- R-1/R-2/R-3 acceptance lines each backed by a passing test in `merge.test.js` and the `mergeState` impl in `worker.js`.
+- `node --test` → 4/4 pass; verify-report shows 3/3 acceptance met, no UNMET line.
+- No spec violation or scope creep beyond the accepted delta.
